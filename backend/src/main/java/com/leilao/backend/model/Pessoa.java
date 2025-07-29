@@ -1,8 +1,13 @@
 package com.leilao.backend.model;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.br.CPF;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -24,7 +29,7 @@ import lombok.Setter;
 @Entity
 @Data
 @Table(name = "pessoa")
-public class Pessoa implements UserDetai{
+public class Pessoa implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -45,5 +50,21 @@ public class Pessoa implements UserDetai{
             p.setPessoa(this);
         }
         this.pessoaPerfil = pessoaPerfil;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return pessoaPerfil.stream().map(user -> new SimpleGrantedAuthority(user.getPerfil().getNome()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return senha;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }
